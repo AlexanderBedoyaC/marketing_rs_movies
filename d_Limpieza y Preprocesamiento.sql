@@ -1,8 +1,16 @@
 
-drop table if exists movies2;
-create table  movies2 as 
-SELECT SUBSTR(title, -5, 4) AS year,
-        SUBSTR(title, 1, INSTR(title, '(') - 2) AS title,
+/* Crear nueva tabla movies extrayendo año, título y los géneros como columnas individuales */
+DROP TABLE IF EXISTS movies2;
+CREATE TABLE  movies2 AS
+SELECT movieId,
+        CASE WHEN SUBSTR(RTRIM(title, ' '), -6, 1) = '('
+                THEN SUBSTR(RTRIM(title, ' '), -5, 4)
+                ELSE 0000
+                END AS year,
+        CASE WHEN SUBSTR(RTRIM(title, ' '), -6, 1) = '('
+                THEN SUBSTR(RTRIM(title, ' '), 1, INSTR(RTRIM(title, ' '), '(') - 2)
+                ELSE RTRIM(title, ' ')
+                END AS title,
         CASE WHEN genres LIKE '%Action%' THEN 1 ELSE 0 END AS `Action`,
         CASE WHEN genres LIKE '%Adventure%' THEN 1 ELSE 0 END AS Adventure,
         CASE WHEN genres LIKE '%Animation%' THEN 1 ELSE 0 END AS Animation,
@@ -24,3 +32,20 @@ SELECT SUBSTR(title, -5, 4) AS year,
         CASE WHEN genres LIKE '%Western%' THEN 1 ELSE 0 END AS Western,
         CASE WHEN genres LIKE '%(no genres listed)%' THEN 1 ELSE 0 END AS Desconocido
 FROM movies;
+
+/* Crear nueva tabla ratings formateando la fecha */
+DROP TABLE IF EXISTS ratings2;
+CREATE TABLE ratings2 AS
+SELECT userId, movieId, rating,
+        strftime('%Y-%m-%d', datetime(timestamp, 'unixepoch')) AS date
+FROM ratings;
+
+/* Crear nueva tabla que una las tablas movies y ratings por medio del movieId */
+DROP TABLE IF EXISTS movies_rating;
+CREATE TABLE movies_rating AS
+SELECT mv.*, rt.userId, rt.rating, rt.date
+FROM ratings2 AS rt
+LEFT JOIN movies2 as mv
+ON rt.movieId = mv.movieId;
+
+
