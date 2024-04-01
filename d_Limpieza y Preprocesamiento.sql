@@ -5,12 +5,9 @@ CREATE TABLE  movies2 AS
 SELECT movieId,
         CASE WHEN SUBSTR(RTRIM(title, ' '), -6, 1) = '('
                 THEN SUBSTR(RTRIM(title, ' '), -5, 4)
-                ELSE 0000
+                ELSE 1900
                 END AS year,
-        CASE WHEN SUBSTR(RTRIM(title, ' '), -6, 1) = '('
-                THEN SUBSTR(RTRIM(title, ' '), 1, INSTR(RTRIM(title, ' '), '(') - 2)
-                ELSE RTRIM(title, ' ')
-                END AS title,
+        RTRIM(title, ' ') as title,
         CASE WHEN genres LIKE '%Action%' THEN 1 ELSE 0 END AS `Action`,
         CASE WHEN genres LIKE '%Adventure%' THEN 1 ELSE 0 END AS Adventure,
         CASE WHEN genres LIKE '%Animation%' THEN 1 ELSE 0 END AS Animation,
